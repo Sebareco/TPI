@@ -2,7 +2,7 @@
 #define RESPUESTA_H
 
 typedef struct Respuesta {
-    int Respuesta_Id;
+    long long Respuesta_Id;
     int Pregunta_Id;
     int Respuesta_Nro;
     char RespuestaTexto[50];

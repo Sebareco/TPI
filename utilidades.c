@@ -1,6 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 
+int contarCifras(long long valor) {
+    int cifras = 0;
+    while (valor > 0) {
+        valor /= 10;
+        cifras++;
+    }
+    return cifras;
+}
+
 void verificar(void* dato, int tipo) {
     switch(tipo) {
         case 1: { // int
@@ -29,6 +38,17 @@ void verificar(void* dato, int tipo) {
                 printf("Cadena vacía\n");
             }
             break;
+        }
+        case 4: { // long long
+            long long valor = *(long long*)dato;
+            if(contarCifras(valor) == 12)
+            {
+                printf("LONG LONG VALIDO");
+            }
+            else
+            {
+                printf("LONG LONG INVALIDO");
+            }
         }
         default:
             printf("Tipo no reconocido\n");

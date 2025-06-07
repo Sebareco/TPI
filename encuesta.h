@@ -9,8 +9,8 @@ typedef struct Encuesta {
     int Encuesta_Mes;
     int Anio;
     int Procesada; // 0: No procesada, 1: Procesada
-    struct Encuesta *sig; // Apunta al siguiente en la pila
-    struct Pregunta *TopePreguntas; // Apunta a su lista de preguntas
+    Encuesta *sig; // Apunta al siguiente en la pila
+    Pregunta *TopePreguntas; // Apunta a su lista de preguntas
 } Encuesta;
 
 typedef struct {
@@ -20,6 +20,8 @@ typedef struct {
 
 void ApilarEncu(PilaEncuestas *pila, Encuesta nueva);
 Encuesta* DesapilarpEncu(PilaEncuestas *pila);
-void MostrarEncuestas(PilaEncuestas pila);
+void sig(PilaEncuestas *pila, PilaEncuestas *aux, Encuesta *dato);
+void ant(PilaEncuestas *pila, PilaEncuestas *aux, Encuesta *dato);
+void MostrarEncuesta(PilaEncuestas *pila);
 
 #endif

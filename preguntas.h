@@ -8,12 +8,12 @@ typedef struct Pregunta {
     int Pregunta_Id;
     char PreguntaTexto[100];
     float Ponderacion;
-    struct Pregunta *sig; // Apunta a la siguiente pregunta
-    struct Respuesta *TopeRespuestas; // Apunta a su lista de respuestas
+    Pregunta *sig; // Apunta a la siguiente pregunta
+    Respuesta *TopeRespuestas; // Apunta a su lista de respuestas
 } Pregunta;
 
 
 void AgregarPregunta(Pregunta *lista, Pregunta nueva);
-void MostrarPreguntas(Pregunta lista);
+void MostrarPreguntas(Pregunta *lista);
 
 #endif

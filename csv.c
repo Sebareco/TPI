@@ -4,7 +4,7 @@
 
 csv* PedidoCsv()
 {
-    FILE *csv = fopen("CSVS.csv", "rb");
+    FILE *csv = fopen("CSVS.csv", "r");
     if(csv != NULL)
     {
         
@@ -36,7 +36,7 @@ csv* PedidoTesteo() { // A mano
         printf("\nID del encuestador: ");
         scanf("%d", &Dato->Encuestador);
 
-        printf("\nValor de respuesta: ");
+        printf("\nNumero de respuesta: ");
         scanf("%lf", &Dato->ID_Enc_Resp);
 
         Dato->izquierda = NULL;
@@ -46,14 +46,16 @@ csv* PedidoTesteo() { // A mano
     return Dato;
 }
 
+
+
 csv* insertarCSV(csv* raiz, csv* nuevo) {
     csv* resultado = raiz;
   
     if (raiz == NULL) {
         resultado = nuevo;
-    } else if (nuevo->ID_Respuesta < raiz->ID_Respuesta) {
+    } else if (nuevo->ID_Enc_Resp < raiz->ID_Enc_Resp) {
         raiz->izquierda = insertarCSV(raiz->izquierda, nuevo);
-    } else if (nuevo->ID_Respuesta > raiz->ID_Respuesta) {
+    } else if (nuevo->ID_Enc_Resp > raiz->ID_Enc_Resp) {
         raiz->derecha = insertarCSV(raiz->derecha, nuevo);
     }
     // Si son iguales, no insertamos (puede cambiarse si querés permitir duplicados)

@@ -10,5 +10,7 @@ typedef struct
 int leerTecla();
 void printMenu(MenuOpcion opciones[], int cantidad, int seleccion);
 void menuG(MenuOpcion opciones[], int cantidad, void *contexto);
+void menuEncu(MenuOpcion opciones[], int cantidad, void *contexto, PilaEncuestas *pila, PilaEncuestas *aux);
+void printEncu(Encuesta *dato);
 
 #endif

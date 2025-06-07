@@ -8,11 +8,11 @@ typedef struct Respuesta {
     char RespuestaTexto[50];
     float Ponderacion;
     int Elegida;
-    struct Respuesta *sig; // Lista circular
+    Respuesta *sig; // Lista circular
 } Respuesta;
 
 
 void AgregarRespuesta(Respuesta *lista, Respuesta nueva);
-void MostrarRespuestas(Respuesta lista);
+void MostrarRespuestas(Respuesta *lista);
 
 #endif

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "encuesta.h"
 #include "preguntas.h"
 #include "Menu_Generico.h"
@@ -38,66 +39,89 @@ Encuesta* DesapilarpEncu(PilaEncuestas *pila)
 	return temporal;
 }
 
-void sig(PilaEncuestas *pila, PilaEncuestas *aux, Encuesta *dato)
-{
-    ApilarEncu(&aux, dato);
-    dato = DesapilarpEncu(&pila);
+void VerPreguntas(void *contexto) {
+    Encuesta *encuesta = (Encuesta *) contexto;
+
+    if (!encuesta || !encuesta->TopePreguntas) {
+        printf("Esta encuesta no tiene preguntas.\n");
+        system("pause");
+        return;
+    }
+
+    menuPreguntas(encuesta);
 }
 
-void ant(PilaEncuestas *pila, PilaEncuestas *aux, Encuesta *dato)
-{
-    ApilarEncu(&pila, dato);
-    dato = DesapilarpEncu(&aux);
+void printEncu(void *contexto) {
+    ContextoEncuesta *ctx = (ContextoEncuesta *)contexto;
+    Encuesta *dato = *(ctx->dato);
+
+    if (dato != NULL) {
+        printf("ID: %d\n", dato->Encuesta_Id);
+        printf("Nombre: %s\n", dato->Denominacion);
+        printf("Estado: %s\n\n", dato->Procesada ? "PROCESADA" : "NO PROCESADA");
+    }
 }
 
-void salir()
-{
-
+void sig(void *contexto) {
+    ContextoEncuesta *ctx = (ContextoEncuesta *)contexto;
+    ApilarEncu(ctx->aux, *(ctx->dato));
+    *(ctx->dato) = DesapilarpEncu(ctx->pila);
 }
+
+void ant(void *contexto) {
+    ContextoEncuesta *ctx = (ContextoEncuesta *)contexto;
+    ApilarEncu(ctx->pila, *(ctx->dato));
+    *(ctx->dato) = DesapilarpEncu(ctx->aux);
+}
+
 
 
 void MostrarEncuesta(PilaEncuestas *pila)
 {
-    if(pila->tope != NULL)
-    {
-        Encuesta *dato;
-        PilaEncuestas *aux;
-        dato = DesapilarpEncu(&pila);
-        while(1){
-            if(aux->tope == NULL)
-            {
-                MenuOpcion Encuesta [] =
-                {
-                    {"Ver Encuestas", NULL},
-                    {"Siguiente", sig},
-                    {"Salir", NULL}
-                };
-                int cantidadOpciones = sizeof(Encuesta) / sizeof(Encuesta[0]);
-                menuEncu(Encuesta, cantidadOpciones, &dato, &pila, &aux);
-            }
-            else if(aux->tope != NULL && pila->tope != NULL)
-            {
-                MenuOpcion Encuesta [] =
-                {
-                    {"Ver Encuestas", NULL},
-                    {"Siguiente", sig},
-                    {"Anterior", ant},
-                    {"Salir", NULL}
-                };
-                int cantidadOpciones = sizeof(Encuesta) / sizeof(Encuesta[0]);
-                menuEncu(Encuesta, cantidadOpciones, &dato, &pila, &aux);
-            }
-            else if(pila->tope == NULL)
-            {
-                MenuOpcion Encuesta [] =
-                {
-                    {"Ver Encuestas", NULL},
-                    {"Anterior", ant},
-                    {"Salir", NULL}
-                };
-                int cantidadOpciones = sizeof(Encuesta) / sizeof(Encuesta[0]);
-                menuEncu(Encuesta, cantidadOpciones, &dato, &pila, &aux);
-            }
+    if (pila == NULL || pila->tope == NULL) {
+        printf("No hay encuestas disponibles.\n");
+        return;
+    }
+
+    PilaEncuestas aux = {NULL};
+    Encuesta *dato = DesapilarpEncu(pila);
+    ContextoEncuesta ctx = {pila, &aux, &dato};
+
+    while (1) {
+        system("cls");
+        printEncu(&ctx);
+
+        if (aux.tope == NULL) {
+            MenuOpcion opciones[] = {
+                {"Ver preguntas", VerPreguntas},
+                {"Siguiente", sig},
+                {"Salir", NULL}
+            };
+            menuG(opciones, 2, &ctx);
         }
+        else if (aux.tope != NULL && pila->tope != NULL) {
+            MenuOpcion opciones[] = {
+                {"Ver preguntas", VerPreguntas},
+                {"Siguiente", sig},
+                {"Anterior", ant},
+                {"Salir", NULL}
+            };
+            menuG(opciones, 3, &ctx);
+        }
+        else if (pila->tope == NULL) {
+            MenuOpcion opciones[] = {
+                {"Ver preguntas", VerPreguntas},
+                {"Anterior", ant},
+                {"Salir", NULL}
+            };
+            menuG(opciones, 2, &ctx);
+        } else break;
+    }
+
+    // Restaurar pila original si saliste antes del final
+    ApilarEncu(&aux, dato);
+    while (aux.tope != NULL) {
+        Encuesta *e = DesapilarpEncu(&aux);
+        ApilarEncu(pila, e);
     }
 }

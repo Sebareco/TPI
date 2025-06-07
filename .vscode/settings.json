@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "menu_generico.h": "c"
+        "menu_generico.h": "c",
+        "respuestas.h": "c"
     }
 }

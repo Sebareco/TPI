@@ -1,8 +1,10 @@
 #ifndef ENCUESTA_H
 #define ENCUESTA_H
+
 #include "preguntas.h"
 
-struct Encuesta;
+typedef struct Encuesta Encuesta;
+typedef struct Pregunta Pregunta;
 
 typedef struct Encuesta {
     int Encuesta_Id;
@@ -10,8 +12,8 @@ typedef struct Encuesta {
     int Encuesta_Mes;
     int Anio;
     int Procesada; // 0: No procesada, 1: Procesada
-    struct Encuesta *sig; // Apunta al siguiente en la pila
-    struct Pregunta *TopePreguntas; // Apunta a su lista de preguntas
+    Encuesta *sig; // Apunta al siguiente en la pila
+    Pregunta *TopePreguntas; // Apunta a su lista de preguntas
 } Encuesta;
 
 typedef struct {
@@ -23,12 +25,16 @@ typedef struct {
     PilaEncuestas *pila;
     PilaEncuestas *aux;
     Encuesta **dato;
+    int salir;
 } ContextoEncuesta;
 
-void ApilarEncu(PilaEncuestas *pila, Encuesta nueva);
+void ApilarEncu(PilaEncuestas *pila, Encuesta *nueva);
 Encuesta* DesapilarpEncu(PilaEncuestas *pila);
-void sig(PilaEncuestas *pila, PilaEncuestas *aux, Encuesta *dato);
-void ant(PilaEncuestas *pila, PilaEncuestas *aux, Encuesta *dato);
+void VerPreguntas(void *contexto);
+void printEncu(void *contexto);
+void sig(void *contexto);
+void ant(void *contexto);
 void MostrarEncuesta(PilaEncuestas *pila);
+void CargarEncuestaDePrueba(PilaEncuestas *pila);
 
 #endif

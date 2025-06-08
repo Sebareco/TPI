@@ -56,3 +56,53 @@ void menuG(MenuOpcion opciones[], int cantidad, void *contexto)
         }
     }
 }
+
+void salirDeEncuesta(void *ctx) {
+	((ContextoEncuesta*)ctx)->salir = 1;
+}
+
+void menuG_con_encabezado(MenuOpcion opciones[], int cantidad, void *contexto, void (*printEncabezado)(void *)) {
+    int posicion = 0, tecla;
+
+    while (1) {
+        system("cls");
+
+        // Imprime encabezado personalizado
+        if (printEncabezado)
+            printEncabezado(contexto);
+
+        printf("==== OPCIONES ====\n\n");
+        for (int i = 0; i < cantidad; i++) {
+            if (i == posicion)
+                printf("-> %s\n", opciones[i].texto);
+            else
+                printf("   %s\n", opciones[i].texto);
+        }
+
+        tecla = getch();
+        if (tecla == 224) {
+            tecla = getch();
+            if (tecla == 72) posicion = (posicion - 1 + cantidad) % cantidad;
+            if (tecla == 80) posicion = (posicion + 1) % cantidad;
+        }else if (tecla == 13) {
+		    if (_stricmp(opciones[posicion].texto, "Salir") == 0) {
+		        if (opciones[posicion].accion)
+		            opciones[posicion].accion(contexto);
+		        break; // salir del menú
+		    }
+		    else if (_stricmp(opciones[posicion].texto, "Siguiente") == 0) {
+		        if (opciones[posicion].accion)
+		            opciones[posicion].accion(contexto);
+		        break; // volver al bucle principal para reconstruir menú
+		    }
+		    else if (_stricmp(opciones[posicion].texto, "Anterior") == 0) {
+		        if (opciones[posicion].accion)
+		            opciones[posicion].accion(contexto);
+		        break; // también salimos para reconstruir
+		    }
+		    else if (opciones[posicion].accion) {
+		        opciones[posicion].accion(contexto); // Ver pregunta, etc.
+		    }
+		}
+	}
+}

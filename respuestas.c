@@ -1,82 +1,120 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "respuestas.h"
 #include "Menu_Generico.h"
 
 int contarRespuestas(Respuesta *inicio) {
-    if (inicio == NULL) return 0;
+    if (!inicio) return 0;
+
     int count = 1;
-    Respuesta *r = inicio->sig;
-    while (r != NULL && r != inicio) {
+    Respuesta *temp = inicio->sig;
+    while (temp && temp != inicio) {
         count++;
-        r = r->sig;
+        temp = temp->sig;
     }
     return count;
 }
 
-Respuesta* obtenerAnterior(Respuesta *inicio, Respuesta *actual) {
-    if (inicio == NULL || actual == NULL) return NULL;
-    Respuesta *r = inicio;
-    while (r->sig != actual && r->sig != inicio) {
-        r = r->sig;
+Respuesta* ObtenerRespuestaPorIndice(Respuesta *inicio, int indice) {
+    if (!inicio) return NULL;
+
+    Respuesta *actual = inicio;
+    for (int i = 0; i < indice; i++) {
+        actual = actual->sig;
+        if (actual == inicio) break; // vuelta completa
     }
-    return r;
+    return actual;
+}
+
+void printRespuestas(void *contexto) {
+    NavegadorRespuestas *nav = (NavegadorRespuestas *)contexto;
+
+    printf("\n==== PREGUNTA ==== ");
+    printf("\nPregunta ID: %d", nav->actual->Pregunta_Id);
+    printf("\nTexto: %s", nav->actual->RespuestaTexto);
+    printf("\nRespuestas Totales: %d", contarRespuestas(nav->inicio));
+    printf("\n----------------------------\n");
+
+    Respuesta *r = nav->actual;
+    if (r) {
+        printf("\nRespuesta Actual: %s", r->RespuestaTexto);
+    }
 }
 
 void VerRespuesta(void *contexto) {
-    NavegadorRespuestas *ctx = (NavegadorRespuestas *) contexto;
-    Respuesta *r = ctx->actual;
+    NavegadorRespuestas *nav = (NavegadorRespuestas *)contexto;
+    Respuesta *r = nav->actual;
 
-    if (r != NULL) {
-        printf("=== Respuesta %d ===\n", ctx->posicion + 1);
-        printf("ID: %lld\n", r->Respuesta_Id);
-        printf("Texto: %s\n", r->RespuestaTexto);
-        printf("Nro: %d\n", r->Respuesta_Nro);
-        printf("Ponderación: %.2f\n", r->Ponderacion);
-        printf("----------------------\n");
+    if (r) {
+        system("cls");
+        printf("\n==== Detalles de la Respuesta ====");
+        printf("\nID: %lld", r->Respuesta_Id);
+        printf("\nTexto: %s", r->RespuestaTexto);
+        printf("\nPonderación: %.2f", r->Ponderacion);
+        printf("\n----------------------------------\n");
         system("pause");
     }
 }
 
+void salirDeRespuestas(void *contexto) {
+    NavegadorRespuestas *nav = (NavegadorRespuestas *)contexto;
+    nav->salir = 1;
+}
+
 void SiguienteRespuesta(void *contexto) {
-    NavegadorRespuestas *ctx = (NavegadorRespuestas *)contexto;
-    if (ctx->actual != NULL) {
-        ctx->actual = ctx->actual->sig;
-        ctx->posicion = (ctx->posicion + 1) % contarRespuestas(ctx->inicio);
-    }
+    NavegadorRespuestas *nav = (NavegadorRespuestas *)contexto;
+    if (nav->actual && nav->actual->sig)
+        nav->actual = nav->actual->sig;
 }
 
 void AnteriorRespuesta(void *contexto) {
-    NavegadorRespuestas *ctx = (NavegadorRespuestas *)contexto;
-    Respuesta *prev = obtenerAnterior(ctx->inicio, ctx->actual);
-    if (prev != NULL) {
-        ctx->actual = prev;
-        ctx->posicion = (ctx->posicion - 1 + contarRespuestas(ctx->inicio)) % contarRespuestas(ctx->inicio);
+    NavegadorRespuestas *nav = (NavegadorRespuestas *)contexto;
+    Respuesta *temp = nav->actual;
+    if (!temp || !temp->sig) return;
+
+    Respuesta *prev = temp;
+    while (prev->sig != temp) {
+        prev = prev->sig;
     }
+    nav->actual = prev;
 }
 
-void menuRespuestas(Respuesta *inicio) {
-    if (inicio == NULL) {
-        printf("No hay respuestas para esta pregunta.\n");
+void menuRespuestas(Respuesta *lista) {
+    if (!lista) {
+        printf("\nEsta pregunta no tiene respuestas.");
         system("pause");
         return;
     }
 
-    NavegadorRespuestas ctx = {inicio, inicio, 0};
+    NavegadorRespuestas nav;
+    nav.inicio = lista;
+    nav.actual = lista;
+    nav.posicion = 0;
+    nav.salir = 0;
 
-    MenuOpcion opciones[] = {
-        {"Ver Respuesta", VerRespuesta},
-        {"Siguiente", SiguienteRespuesta},
-        {"Anterior", AnteriorRespuesta},
-        {"Salir", NULL}
-    };
+    while (!nav.salir) {
+        MenuOpcion opciones[4];
+        int cantidad = 0;
+        int total = contarRespuestas(nav.inicio);
 
-    while (1) {
-        system("cls");
-        printf("=== Navegador de Respuestas ===\n");
-        printf("Posición actual: %d\n\n", ctx.posicion + 1);
-        menuG(opciones, 4, &ctx);
-        if (ctx.actual == NULL) break;
+        if (nav.actual->sig == nav.inicio) {
+            // Estamos en la última respuesta (solo podemos volver)
+            opciones[cantidad++] = (MenuOpcion){"Anterior", AnteriorRespuesta};
+        } else if (nav.actual == nav.inicio) {
+            // Estamos en la primera respuesta (solo podemos avanzar)
+            opciones[cantidad++] = (MenuOpcion){"Siguiente", SiguienteRespuesta};
+        } else {
+            // Estamos en el medio, podemos ir en ambas direcciones
+            opciones[cantidad++] = (MenuOpcion){"Siguiente", SiguienteRespuesta};
+            opciones[cantidad++] = (MenuOpcion){"Anterior", AnteriorRespuesta};
+        }
+
+
+        opciones[cantidad++] = (MenuOpcion){"Salir", salirDeRespuestas};
+
+        menuG_con_encabezado(opciones, cantidad, &nav, printRespuestas);
     }
 }

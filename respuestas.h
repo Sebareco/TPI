@@ -1,7 +1,8 @@
 #ifndef RESPUESTA_H
 #define RESPUESTA_H
 
-struct Respuesta;
+typedef struct Pregunta Pregunta;
+typedef struct Respuesta Respuesta;
 
 typedef struct Respuesta {
     long long Respuesta_Id;
@@ -9,26 +10,21 @@ typedef struct Respuesta {
     int Respuesta_Nro;
     char RespuestaTexto[50];
     float Ponderacion;
-    struct Respuesta *sig; // Lista circular
+    Respuesta *sig;
 } Respuesta;
 
 typedef struct {
     Respuesta *inicio;
     Respuesta *actual;
     int posicion;
+    int salir;
 } NavegadorRespuestas;
 
-// Funciones para mostrar respuestas (modo visual)
-void menuRespuestas(Respuesta *inicio);
+int contarRespuestas(Respuesta *inicio);
+Respuesta* obtenerAnterior(Respuesta *inicio, Respuesta *actual);
 void VerRespuesta(void *contexto);
 void SiguienteRespuesta(void *contexto);
 void AnteriorRespuesta(void *contexto);
+void menuRespuestas(Respuesta *inicio);
 
-// Funciones auxiliares
-int contarRespuestas(Respuesta *inicio);
-Respuesta* obtenerAnterior(Respuesta *inicio, Respuesta *actual);
-
-// Gestión de nodos (opcional si ya existen)
-void AgregarRespuesta(Respuesta *lista, Respuesta nueva);
-void MostrarRespuestas(Respuesta *lista);
 #endif
